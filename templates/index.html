@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>NetClass Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">PC 상태 모니터링</h5>
+                <div>
+                    <a href="/analytics" class="btn btn-info btn-sm me-1 text-white">📊 통계 분석</a>
+                    <a href="/logs" class="btn btn-secondary btn-sm me-1">📋 로그 확인</a>
+                    <form action="/admin/run_maintenance" method="POST" class="d-inline">
+                        <button type="submit" class="btn btn-warning btn-sm me-1">⚠ 야간점검 실행</button>
+                    </form>
+                    <form action="/admin/health_check" method="POST" class="d-inline">
+                        <button type="submit" class="btn btn-success btn-sm me-1">✔ 상태 점검</button>
+                    </form>
+                    <a href="/pc/register" class="btn btn-light btn-sm">+ PC 등록</a>
+                </div>
+            </div>
+            <div class="card-body">
+                <table class="table table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>PC Name</th>
+                            <th>Location</th>
+                            <th>IP Addr</th>
+                            <th>Status</th>
+                            <th>Score</th> <th>Mode</th>
+                            <th>Active Snapshot</th>
+                            <th>Controls</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pc in pcs %}
+                        <tr>
+                            <td>{{ pc.pc_id }}</td>
+                            <td><a href="/pc/{{ pc.pc_id }}" class="fw-bold text-decoration-none">{{ pc.pc_name }}</a></td>
+                            <td>
+                                {{ pc.floor }}{{ 'F' if pc.floor != 'IFZONE' else '' }}
+
+                                {% if pc.location_name %}
+                                    - {{ pc.location_name }}
+                                {% endif %}
+                            </td>
+                            <td>{{ pc.ip_address }}</td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if pc.status == 'Online' else 'secondary' }}">
+                                    {{ pc.status }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if pc.health_score >= 80 %}
+                                    <span class="text-success fw-bold">{{ pc.health_score }}</span>
+                                {% elif pc.health_score >= 50 %}
+                                    <span class="text-warning fw-bold">{{ pc.health_score }}</span>
+                                {% else %}
+                                    <span class="text-danger fw-bold">{{ pc.health_score }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-{{ 'info' if pc.current_mode == 'Recovery' else 'warning' }}">
+                                    {{ pc.current_mode }}
+                                </span>
+                            </td>
+                            <td>{{ pc.active_snapshot_name or '-' }}</td>
+                            <td>
+                                <form action="/change_mode" method="POST" class="d-flex gap-1">
+                                    <input type="hidden" name="pc_id" value="{{ pc.pc_id }}">
+                                    <select name="new_mode" class="form-select form-select-sm" style="width: auto;">
+                                        <option value="Recovery" {{ 'selected' if pc.current_mode == 'Recovery' }}>Recovery</option>
+                                        <option value="Maintenance" {{ 'selected' if pc.current_mode == 'Maintenance' }}>Maint.</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-sm btn-outline-dark">Set</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

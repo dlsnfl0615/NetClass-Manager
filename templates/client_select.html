@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>User Client Simulation</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .pc-card { cursor: pointer; transition: transform 0.2s; }
+        .pc-card:hover { transform: scale(1.05); border-color: #0d6efd; }
+    </style>
+</head>
+<body class="bg-dark text-white">
+    <div class="container py-5">
+        <h1 class="text-center mb-5">NetClass Client Simulation</h1>
+        <p class="text-center text-muted mb-5">사용할 좌석(PC)을 선택하여 로그인하세요.</p>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% for pc in pcs %}
+            <div class="col">
+                <a href="/client/{{ pc.pc_id }}" class="text-decoration-none text-dark">
+                    <div class="card h-100 pc-card">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">{{ pc.pc_name }}</h5>
+                            <p class="card-text text-muted">{{ pc.location_name }} ({{ pc.floor }}F)</p>
+                            
+                            {% if pc.current_mode == 'Recovery' %}
+                                <span class="badge bg-success">복구 모드 (초기화됨)</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">유지관리 모드 (저장됨)</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center mt-5">
+            <a href="/" class="btn btn-outline-light">관리자 페이지로 이동</a>
+        </div>
+    </div>
+</body>
+</html>

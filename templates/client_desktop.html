@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ pc.pc_name }} - Desktop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #3a6ea5; min-height: 100vh; } /* 윈도우 기본 배경색 느낌 */
+        .desktop-icon { width: 80px; text-align: center; color: white; margin: 20px; cursor: pointer; }
+        .desktop-icon i { font-size: 2rem; display: block; margin-bottom: 5px; }
+        .taskbar { position: fixed; bottom: 0; width: 100%; height: 50px; background: #222; display: flex; align-items: center; padding: 0 10px; }
+        .window { background: white; border-radius: 5px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+    </style>
+    <!-- 아이콘 사용을 위한 CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+</head>
+<body>
+    <!-- 바탕화면 -->
+    <div class="container-fluid p-4">
+        <h3 class="text-white mb-4">
+            <i class="bi bi-display"></i> {{ pc.pc_name }} 
+            <small class="fs-6 opacity-75">({{ pc.current_mode }} Mode)</small>
+        </h3>
+
+        <div class="row">
+            <!-- 설치된 프로그램 아이콘 표시 -->
+            <div class="col-12 d-flex flex-wrap align-content-start">
+                <div class="desktop-icon">
+                    <i class="bi bi-recycle"></i>
+                    <span>휴지통</span>
+                </div>
+                <div class="desktop-icon">
+                    <i class="bi bi-folder2-open"></i>
+                    <span>내 문서</span>
+                </div>
+                <!-- DB에서 가져온 소프트웨어 목록 -->
+                {% for sw in softwares %}
+                <div class="desktop-icon">
+                    <i class="bi bi-app-indicator"></i>
+                    <span>{{ sw.software_name }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- 프로그램 설치 시뮬레이터 (윈도우 창 모양) -->
+        <div class="window p-3 mt-5 mx-auto" style="max-width: 500px;">
+            <h5 class="border-bottom pb-2 mb-3"><i class="bi bi-download"></i> 소프트웨어 설치 센터</h5>
+            <form action="/client/install" method="POST">
+                <input type="hidden" name="pc_id" value="{{ pc.pc_id }}">
+                <div class="input-group mb-3">
+                    <input type="text" name="software_name" class="form-control" placeholder="설치할 프로그램명 (예: 카카오톡)" required>
+                    <button class="btn btn-primary" type="submit">다운로드 및 설치</button>
+                </div>
+                <small class="text-muted">
+                    * 복구 모드인 경우, 재부팅 시 이곳에서 설치한 프로그램은 삭제됩니다.
+                </small>
+            </form>
+        </div>
+    </div>
+
+    <!-- 작업 표시줄 -->
+    <div class="taskbar">
+        <button class="btn btn-light btn-sm fw-bold me-3">
+            <i class="bi bi-windows"></i> Start
+        </button>
+        <span class="text-white ms-auto me-3">{{ pc.current_mode }} 상태</span>
+        
+        <!-- 시스템 종료 버튼 -->
+        <form action="/client/shutdown" method="POST" class="m-0">
+            <input type="hidden" name="pc_id" value="{{ pc.pc_id }}">
+            <button type="submit" class="btn btn-danger btn-sm">
+                <i class="bi bi-power"></i> 시스템 종료 (재부팅)
+            </button>
+        </form>
+    </div>
+    
+    <!-- 알림 메시지 (설치 완료 등) -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
+                {% for category, message in messages %}
+                <div class="toast show align-items-center text-white bg-{{ category }} border-0">
+                    <div class="d-flex">
+                        <div class="toast-body">{{ message }}</div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+</body>
+</html>

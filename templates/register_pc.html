@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>PC 등록 - NetClass</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container mt-5" style="max-width: 600px;">
+        <div class="card shadow">
+            <div class="card-header bg-dark text-white">
+                <h4 class="mb-0">신규 PC 등록</h4>
+            </div>
+            <div class="card-body">
+                <form action="/pc/register" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">PC Name (자산번호)</label>
+                        <input type="text" name="pc_name" class="form-control" placeholder="예: PC-2F-001" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">설치 위치</label>
+                        <select name="location_id" class="form-select" required>
+                            <option value="">위치를 선택하세요</option>
+                            {% for loc in locations %}
+                                <option value="{{ loc.location_id }}">
+                                    {% if loc.floor == 'B2' %}
+                                        지하 2층
+                                    {% elif loc.floor == 'B1' %}
+                                        지하 1층
+                                    {% elif loc.floor == 'IFZONE' %}
+                                        {% if loc.location_name == 'TROOM' %}
+                                            IFZONE - TROOM
+                                        {% else %}
+                                            IFZONE
+                                        {% endif %}
+                                    {% else %}
+                                        {{ loc.floor }}층 {{ ('- ' + loc.location_name) if loc.location_name else '' }}
+                                    {% endif %}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">IP Address</label>
+                        <input type="text" name="ip_address" class="form-control" placeholder="192.168.x.x" required>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <a href="/" class="btn btn-secondary">취소</a>
+                        <button type="submit" class="btn btn-primary">등록하기</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

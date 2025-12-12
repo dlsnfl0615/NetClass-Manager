@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ pc.pc_name }} Detail</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <a href="/" class="btn btn-outline-secondary mb-3">&larr; Back to Dashboard</a>
+        
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0">{{ pc.pc_name }} 정보</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>IP Address:</strong> {{ pc.ip_address }}</p>
+                        <p><strong>Location:</strong> {{ pc.floor }}층 {{ pc.location_name }}</p>
+                        <p><strong>Current Mode:</strong> <span class="badge bg-info">{{ pc.current_mode }}</span></p>
+                        <hr>
+                        <h6>개별 원격 명령</h6>
+                        <form action="/remote_command" method="POST">
+                            <input type="hidden" name="target_pc_id" value="{{ pc.pc_id }}">
+                            <div class="input-group mb-3">
+                                <select name="command_type" class="form-select">
+                                    <option value="Restart">재부팅</option>
+                                    <option value="Windows Update">윈도우 업데이트</option>
+                                    <option value="Logoff">강제 로그아웃</option>
+                                </select>
+                                <button class="btn btn-danger" type="submit">전송</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0">설치된 소프트웨어</h5>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        {% for sw in softwares %}
+                        <li class="list-group-item">{{ sw.software_name }} <small class="text-muted">({{ sw.install_date }})</small></li>
+                        {% else %}
+                        <li class="list-group-item text-muted">설치된 SW 정보 없음</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <div class="card shadow-sm">
+                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">복구 시점 (Snapshot) 관리</h5>
+                        <button class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#createSnapshotModal">
+                            + 시점 생성
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Slot</th>
+                                    <th>Description</th>
+                                    <th>Created At</th>
+                                    <th>Active</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for snap in snapshots %}
+                                <tr class="{{ 'table-success' if pc.active_snapshot_name == snap.description }}">
+                                    <td>{{ snap.slot_number }}</td>
+                                    <td>{{ snap.description }}</td>
+                                    <td>{{ snap.created_at }}</td>
+                                    <td>
+                                        {% if pc.active_snapshot_name == snap.description %}
+                                            <span class="badge bg-success">현재 적용 중</span>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if pc.active_snapshot_name != snap.description %}
+                                        <form action="/pc/set_active_snapshot" method="POST">
+                                            <input type="hidden" name="pc_id" value="{{ pc.pc_id }}">
+                                            <input type="hidden" name="snapshot_id" value="{{ snap.snapshot_id }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-primary">이 시점 적용</button>
+                                        </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="createSnapshotModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">새 복구 시점 생성</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="/pc/create_snapshot" method="POST">
+                    <div class="modal-body">
+                        <input type="hidden" name="pc_id" value="{{ pc.pc_id }}">
+                        <div class="mb-3">
+                            <label class="form-label">Slot Number (0-4)</label>
+                            <select name="slot_number" class="form-select">
+                                <option value="0">0 (초기 상태)</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <input type="text" name="description" class="form-control" placeholder="예: 윈도우 업데이트 완료 후" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                        <button type="submit" class="btn btn-primary">생성하기</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

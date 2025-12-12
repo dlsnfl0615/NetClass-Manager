@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>System Logs</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3>📋 시스템 감사 로그 (최신 100건)</h3>
+            <a href="/" class="btn btn-secondary">메인으로 돌아가기</a>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <table class="table table-striped table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Time</th>
+                            <th>Type</th>
+                            <th>PC Name</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in logs %}
+                        <tr>
+                            <td>{{ log.event_time }}</td>
+                            <td>
+                                {% if log.event_type == 'Error' or 'Shutdown' in log.event_type %}
+                                    <span class="badge bg-danger">{{ log.event_type }}</span>
+                                {% elif log.event_type == 'Mode_Change' %}
+                                    <span class="badge bg-warning text-dark">{{ log.event_type }}</span>
+                                {% else %}
+                                    <span class="badge bg-info">{{ log.event_type }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ log.pc_name or 'System/Deleted' }}</td>
+                            <td class="text-muted">{{ log.details }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center">기록된 로그가 없습니다.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

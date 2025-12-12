@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>NetClass Analytics</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-dark bg-dark mb-4">
+    <div class="container">
+        <a class="navbar-brand" href="/">NetClass Manager</a>
+        <div>
+             <span class="text-light me-3">관리자: {{ session['admin_name'] }}</span>
+            <a href="/" class="btn btn-outline-light">Back to Dashboard</a>
+        </div>
+    </div>
+</nav>
+
+    <div class="container">
+        <h2 class="mb-4">데이터베이스 고급 분석 리포트</h2>
+        
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">SW 설치 수량 랭킹 (Window Function: DENSE_RANK)</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>PC Name</th>
+                                    <th>SW Count</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in rankings %}
+                                <tr>
+                                    <td><strong>{{ row.ranking }}위</strong></td>
+                                    <td>{{ row.pc_name }}</td>
+                                    <td>{{ row.cnt }}개</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">PC별 SW 개수 (Stored Function: fn_GetSoftwareCount)</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group">
+                            {% for row in sw_counts %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ row.pc_name }}
+                                <span class="badge bg-primary rounded-pill">{{ row.sw_count }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0">층별/장소별 PC 현황 (GROUP BY WITH ROLLUP)</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Floor (Group)</th>
+                                    <th>Location (Sub Group)</th>
+                                    <th>PC Count</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in rollups %}
+                                <tr class="{{ 'table-active fw-bold' if row.loc_grp == 'Sub Total' or row.floor_grp == 'Total' }}">
+                                    <td>{{ row.floor_grp }}</td>
+                                    <td>{{ row.loc_grp }}</td>
+                                    <td>{{ row.pc_count }}대</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        <p class="text-muted small mt-2">
+                            * <strong>Sub Total</strong>: 해당 층(Floor)의 PC 합계(소계) / <strong>Total</strong>: 도서관 전체 PC 총합(총계)
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
