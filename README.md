@@ -5,13 +5,13 @@
 
 관리자가 웹 대시보드를 통해 원격으로 시스템을 제어하고, 재부팅 시 PC 상태를 특정 시점으로 자동 복구하는 기능을 핵심으로 합니다.
 
-## 🛠 기술 스택 (Tech Stack)
+## 🛠 기술 스택
 * **Backend:** Python 3.14.0, Flask
 * **Database:** MySQL 8.0 (InnoDB)
 * **Frontend:** HTML5, CSS3, Bootstrap 5.3
 * **Tools:** VS Code, MySQL Workbench
 
-## ✨ 주요 기능 (Key Features)
+## ✨ 주요 기능
 
 ### 1. 자동 복구 (Auto-Recovery) & 스냅샷 관리
 * **Snapshot 기반 복원:** PC 재부팅 시 관리자가 지정한 'Active Snapshot' 시점 이후에 생성된 모든 데이터(설치된 소프트웨어 등)를 자동으로 삭제하여 초기 상태로 되돌립니다.
@@ -21,7 +21,7 @@
 * **실시간 모니터링:** 층별/구역별 PC의 상태(Online/Offline), 현재 모드(Recovery/Maintenance), 건강 상태 점수를 한눈에 파악할 수 있습니다.
 * **원격 명령:** 관리자는 웹 인터페이스를 통해 원격으로 PC를 종료(재부팅), 로그오프시키거나 운영 모드를 변경할 수 있습니다.
 
-### 3. 데이터 분석 및 통계 (Analytics)
+### 3. 데이터 분석 및 통계
 * **SW 설치 랭킹:** `DENSE_RANK()` 윈도우 함수를 사용하여 많이 설치된 소프트웨어 순위를 산출합니다.
 * **구역별 현황:** `GROUP BY ... WITH ROLLUP`을 활용하여 층별, 장소별 PC 대수의 소계(Sub Total)와 총계를 제공합니다.
 
@@ -29,7 +29,7 @@
 * **야간 자동 점검:** MySQL Event Scheduler(`ev_NightlyReset`)를 통해 매일 밤 23시에 모든 Recovery 모드 PC를 자동으로 초기화합니다.
 * **감사 로그 (Audit Log):** 소프트웨어 설치 시 Trigger(`trg_AfterInstall`)가 작동하여 자동으로 로그를 남기며, 관리자의 모든 조작 행위도 기록됩니다.
 
-## 🗄️ 데이터베이스 설계 (Database Design)
+## 🗄️ 데이터베이스 설계
 
 본 프로젝트는 고급 데이터베이스 객체를 적극 활용하여 비즈니스 로직을 DB 레벨에서 처리하였습니다.
 
@@ -43,7 +43,7 @@
 | **Trigger** | `trg_AfterInstall` | `Installed_Software` 테이블 INSERT 시 자동으로 `Event_Log`에 기록 |
 | **Event** | `ev_NightlyReset` | 매일 밤 23시에 야간 유지보수 프로시저 자동 실행 |
 
-## 🚀 설치 및 실행 방법 (Installation)
+## 🚀 설치 및 실행 방법
 
 1.  **데이터베이스 구축**
     * MySQL에 접속하여 `netclass_db` 데이터베이스를 생성합니다.
